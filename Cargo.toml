@@ -5,6 +5,8 @@ members = [
     "crates/chess-trainer",
     "crates/chess-ai",
     "crates/chess-storage",
+    "crates/chess-llm-agent",
+    "crates/chess-gui",
     "crates/chess-cli",
 ]
 resolver = "2"
@@ -47,3 +49,14 @@ rand = "0.8"
 
 # DateTime
 chrono = { version = "0.4", features = ["serde"] }
+
+# HTTP Client
+reqwest = { version = "0.11", features = ["json", "rustls-tls"] }
+
+# Environment variables
+dotenv = "0.15"
+
+# GUI
+eframe = "0.28"
+egui = "0.28"
+egui_extras = "0.28"
