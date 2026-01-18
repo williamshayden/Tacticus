@@ -1,0 +1,49 @@
+[workspace]
+members = [
+    "crates/chess-core",
+    "crates/chess-engine",
+    "crates/chess-trainer",
+    "crates/chess-ai",
+    "crates/chess-storage",
+    "crates/chess-cli",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Chess Trainer Team"]
+license = "MIT"
+
+[workspace.dependencies]
+# Chess libraries
+chess = "3.2"
+shakmaty = "0.27"
+
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+async-trait = "0.1"
+
+# Database
+sqlx = { version = "0.7", features = ["runtime-tokio-native-tls", "sqlite", "postgres"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# CLI
+clap = { version = "4.4", features = ["derive"] }
+colored = "2.1"
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+# ML/AI
+ndarray = "0.15"
+rand = "0.8"
+
+# DateTime
+chrono = { version = "0.4", features = ["serde"] }
