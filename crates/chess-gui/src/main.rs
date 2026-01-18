@@ -337,34 +337,40 @@ impl TacticusApp {
                     ui.add_space(10.0);
 
                     let text_edit = egui::TextEdit::singleline(&mut self.user_input)
-                        .desired_width(550.0);
+                        .desired_width(550.0)
+                        .hint_text("Type your question here...");
                     let response = ui.add(text_edit);
 
                     ui.add_space(10.0);
 
-                    // WEBCORE: Chunky send button
+                    // WEBCORE: Chunky send button - disabled if no API key
+                    let can_send = !self.openrouter_key.is_empty() && !self.user_input.is_empty();
+                    let button_text = if self.openrouter_key.is_empty() {
+                        "⚙ CONFIGURE API KEY FIRST"
+                    } else if self.user_input.is_empty() {
+                        "▶ SEND (or press Enter)"
+                    } else {
+                        "▶ SEND"
+                    };
+
                     let send_button = egui::Button::new(
-                        egui::RichText::new("▶ SEND")
+                        egui::RichText::new(button_text)
                             .size(14.0)
                             .strong()
                     )
                     .min_size(egui::vec2(100.0, 32.0));
 
-                    if ui.add(send_button).clicked()
-                        || (response.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)))
+                    let send_button = ui.add_enabled(can_send, send_button);
+
+                    if send_button.clicked()
+                        || (can_send && response.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)))
                     {
-                        if !self.user_input.is_empty() {
-                            if self.openrouter_key.is_empty() {
-                                self.coach_response = "⚠️ ERROR: No OpenRouter API key configured!\n\nPlease go to Settings and enter your API key.".to_string();
-                            } else {
-                                // TODO: Call LLM agent
-                                self.coach_response = format!(
-                                    "You asked: {}\n\n[LLM Response will appear here once integrated]",
-                                    self.user_input
-                                );
-                            }
-                            self.user_input.clear();
-                        }
+                        // TODO: Call LLM agent
+                        self.coach_response = format!(
+                            "You asked: {}\n\n[LLM Response will appear here once integrated]",
+                            self.user_input
+                        );
+                        self.user_input.clear();
                     }
                 });
             });
@@ -374,53 +380,169 @@ impl TacticusApp {
     fn show_play(&mut self, ui: &mut egui::Ui) {
         ui.add_space(20.0);
         self.show_xp_panel(ui, "Play a Game", |ui| {
-            ui.label("Chess board will be displayed here");
-            ui.add_space(10.0);
-            ui.label("This view will show:");
-            ui.label("• Interactive chess board");
-            ui.label("• Move input");
-            ui.label("• Real-time coach hints (if requested)");
-            ui.label("• Game analysis after completion");
+            ui.vertical_centered(|ui| {
+                let icon = egui::RichText::new("♟")
+                    .size(48.0)
+                    .color(egui::Color32::from_rgb(0, 84, 166));
+                ui.label(icon);
+
+                ui.add_space(12.0);
+
+                let title = egui::RichText::new("CHESS BOARD COMING SOON")
+                    .size(18.0)
+                    .strong()
+                    .color(egui::Color32::from_rgb(0, 84, 166));
+                ui.label(title);
+
+                ui.add_space(16.0);
+
+                ui.label("This feature will include:");
+                ui.add_space(8.0);
+
+                egui::Frame {
+                    fill: egui::Color32::from_rgb(255, 255, 255),
+                    stroke: egui::Stroke::new(2.0, egui::Color32::from_rgb(200, 200, 200)),
+                    inner_margin: egui::Margin::same(12.0),
+                    rounding: egui::Rounding::same(4.0),
+                    ..Default::default()
+                }.show(ui, |ui| {
+                    ui.label("✓ Interactive chess board with drag & drop");
+                    ui.label("✓ Play against the AI engine");
+                    ui.label("✓ Optional coach hints during play");
+                    ui.label("✓ Move validation and legal move highlighting");
+                    ui.label("✓ Post-game analysis with AI coach feedback");
+                });
+
+                ui.add_space(16.0);
+
+                ui.label("For now, use the HOME tab to chat with your AI coach!");
+            });
         });
     }
 
     fn show_train(&mut self, ui: &mut egui::Ui) {
         ui.add_space(20.0);
         self.show_xp_panel(ui, "Training Exercises", |ui| {
-            ui.label("Personalized training exercises based on your weaknesses");
-            ui.add_space(10.0);
-            ui.label("This view will show:");
-            ui.label("• 5-10 exercises tailored to your skill level");
-            ui.label("• Hints from your AI coach");
-            ui.label("• Detailed explanations after solving");
-            ui.label("• Progress tracking");
+            ui.vertical_centered(|ui| {
+                let icon = egui::RichText::new("📚")
+                    .size(48.0);
+                ui.label(icon);
+
+                ui.add_space(12.0);
+
+                let title = egui::RichText::new("TRAINING SYSTEM COMING SOON")
+                    .size(18.0)
+                    .strong()
+                    .color(egui::Color32::from_rgb(0, 84, 166));
+                ui.label(title);
+
+                ui.add_space(16.0);
+
+                ui.label("Personalized exercises tailored to your skill level");
+                ui.add_space(8.0);
+
+                egui::Frame {
+                    fill: egui::Color32::from_rgb(255, 255, 255),
+                    stroke: egui::Stroke::new(2.0, egui::Color32::from_rgb(200, 200, 200)),
+                    inner_margin: egui::Margin::same(12.0),
+                    rounding: egui::Rounding::same(4.0),
+                    ..Default::default()
+                }.show(ui, |ui| {
+                    ui.label("✓ 5-10 exercises based on your weaknesses");
+                    ui.label("✓ Multiple difficulty levels");
+                    ui.label("✓ Hints from your AI coach when stuck");
+                    ui.label("✓ Detailed explanations after solving");
+                    ui.label("✓ Progress tracking and improvement metrics");
+                });
+
+                ui.add_space(16.0);
+
+                ui.label("For now, ask your AI coach for training tips on the HOME tab!");
+            });
         });
     }
 
     fn show_analyze(&mut self, ui: &mut egui::Ui) {
         ui.add_space(20.0);
         self.show_xp_panel(ui, "Analyze Games", |ui| {
-            ui.label("Deep analysis of your recent games with AI coaching");
-            ui.add_space(10.0);
-            ui.label("This view will show:");
-            ui.label("• List of your recent games");
-            ui.label("• Move-by-move analysis");
-            ui.label("• AI coach feedback on your play");
-            ui.label("• Identified strengths and weaknesses");
+            ui.vertical_centered(|ui| {
+                let icon = egui::RichText::new("🔍")
+                    .size(48.0);
+                ui.label(icon);
+
+                ui.add_space(12.0);
+
+                let title = egui::RichText::new("GAME ANALYSIS COMING SOON")
+                    .size(18.0)
+                    .strong()
+                    .color(egui::Color32::from_rgb(0, 84, 166));
+                ui.label(title);
+
+                ui.add_space(16.0);
+
+                ui.label("Deep AI-powered analysis of your games");
+                ui.add_space(8.0);
+
+                egui::Frame {
+                    fill: egui::Color32::from_rgb(255, 255, 255),
+                    stroke: egui::Stroke::new(2.0, egui::Color32::from_rgb(200, 200, 200)),
+                    inner_margin: egui::Margin::same(12.0),
+                    rounding: egui::Rounding::same(4.0),
+                    ..Default::default()
+                }.show(ui, |ui| {
+                    ui.label("✓ Browse your game history");
+                    ui.label("✓ Move-by-move analysis with best alternatives");
+                    ui.label("✓ AI coach feedback on your decisions");
+                    ui.label("✓ Identify patterns in your strengths and weaknesses");
+                    ui.label("✓ Track improvement over time");
+                });
+
+                ui.add_space(16.0);
+
+                ui.label("For now, describe your games to the AI coach on the HOME tab!");
+            });
         });
     }
 
     fn show_profile(&mut self, ui: &mut egui::Ui) {
         ui.add_space(20.0);
         self.show_xp_panel(ui, "Your Chess Profile", |ui| {
-            ui.label("Track your progress and playing style");
-            ui.add_space(10.0);
-            ui.label("This view will show:");
-            ui.label("• Current rating and skill level");
-            ui.label("• Playing style analysis");
-            ui.label("• Win/loss statistics");
-            ui.label("• Improvement trends");
-            ui.label("• Training history");
+            ui.vertical_centered(|ui| {
+                let icon = egui::RichText::new("👤")
+                    .size(48.0);
+                ui.label(icon);
+
+                ui.add_space(12.0);
+
+                let title = egui::RichText::new("PLAYER PROFILE COMING SOON")
+                    .size(18.0)
+                    .strong()
+                    .color(egui::Color32::from_rgb(0, 84, 166));
+                ui.label(title);
+
+                ui.add_space(16.0);
+
+                ui.label("Your personalized chess journey dashboard");
+                ui.add_space(8.0);
+
+                egui::Frame {
+                    fill: egui::Color32::from_rgb(255, 255, 255),
+                    stroke: egui::Stroke::new(2.0, egui::Color32::from_rgb(200, 200, 200)),
+                    inner_margin: egui::Margin::same(12.0),
+                    rounding: egui::Rounding::same(4.0),
+                    ..Default::default()
+                }.show(ui, |ui| {
+                    ui.label("✓ Current rating and skill level");
+                    ui.label("✓ Playing style analysis (aggressive, defensive, etc.)");
+                    ui.label("✓ Win/loss/draw statistics");
+                    ui.label("✓ Improvement trends and graphs");
+                    ui.label("✓ Training history and achievements");
+                });
+
+                ui.add_space(16.0);
+
+                ui.label("For now, ask your AI coach about your progress on the HOME tab!");
+            });
         });
     }
 
