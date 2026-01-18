@@ -54,7 +54,7 @@ Tacticus is an AI-powered chess training application that uses LLM agents with t
 └─────────────────────────────────────────────────────────────┘
                            ↕
 ┌─────────────────────────────────────────────────────────────┐
-│                    SQLite Database                           │
+│                 PostgreSQL Database                          │
 │  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌──────────┐│
 │  │  Games     │ │  Profiles  │ │ Exercises  │ │Sessions  ││
 │  │  • Moves   │ │  • Rating  │ │ • Results  │ │• History ││
@@ -137,7 +137,7 @@ tool_result = ToolResult::success(tool_call, result);
 - **Tools**: Tool definitions and execution framework
 
 ### `chess-storage`
-- SQLite repositories for games, profiles, exercises
+- PostgreSQL repositories for games, profiles, exercises
 - Tool executors that translate tool calls → database queries
 - Efficient data serialization for LLM consumption
 

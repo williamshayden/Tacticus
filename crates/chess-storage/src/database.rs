@@ -1,13 +1,13 @@
-use sqlx::sqlite::{SqlitePool, SqlitePoolOptions};
+use sqlx::postgres::{PgPool, PgPoolOptions};
 use sqlx::Result;
 
 pub struct Database {
-    pool: SqlitePool,
+    pool: PgPool,
 }
 
 impl Database {
     pub async fn new(database_url: &str) -> Result<Self> {
-        let pool = SqlitePoolOptions::new()
+        let pool = PgPoolOptions::new()
             .max_connections(5)
             .connect(database_url)
             .await?;
@@ -20,7 +20,7 @@ impl Database {
         sqlx::query(
             r#"
             CREATE TABLE IF NOT EXISTS profiles (
-                user_id INTEGER PRIMARY KEY,
+                user_id SERIAL PRIMARY KEY,
                 skill_level TEXT NOT NULL,
                 estimated_rating INTEGER NOT NULL,
                 play_style TEXT NOT NULL,
@@ -29,8 +29,8 @@ impl Database {
                 exercises_completed INTEGER NOT NULL DEFAULT 0,
                 weaknesses TEXT NOT NULL,
                 strengths TEXT NOT NULL,
-                created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL
+                created_at TIMESTAMPTZ NOT NULL,
+                updated_at TIMESTAMPTZ NOT NULL
             )
             "#,
         )
@@ -41,14 +41,14 @@ impl Database {
         sqlx::query(
             r#"
             CREATE TABLE IF NOT EXISTS games (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL,
                 board_fen TEXT NOT NULL,
                 move_history TEXT NOT NULL,
                 game_state TEXT NOT NULL,
                 player_color TEXT NOT NULL,
-                created_at TEXT NOT NULL,
-                finished_at TEXT,
+                created_at TIMESTAMPTZ NOT NULL,
+                finished_at TIMESTAMPTZ,
                 FOREIGN KEY (user_id) REFERENCES profiles(user_id)
             )
             "#,
@@ -60,7 +60,7 @@ impl Database {
         sqlx::query(
             r#"
             CREATE TABLE IF NOT EXISTS exercises (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 exercise_type TEXT NOT NULL,
                 difficulty TEXT NOT NULL,
                 position TEXT NOT NULL,
@@ -79,14 +79,14 @@ impl Database {
         sqlx::query(
             r#"
             CREATE TABLE IF NOT EXISTS exercise_results (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 exercise_id INTEGER NOT NULL,
                 user_id INTEGER NOT NULL,
                 solved BOOLEAN NOT NULL,
                 attempts INTEGER NOT NULL,
                 time_taken_seconds INTEGER NOT NULL,
                 hints_used INTEGER NOT NULL,
-                completed_at TEXT NOT NULL,
+                completed_at TIMESTAMPTZ NOT NULL,
                 FOREIGN KEY (exercise_id) REFERENCES exercises(id),
                 FOREIGN KEY (user_id) REFERENCES profiles(user_id)
             )
@@ -99,15 +99,15 @@ impl Database {
         sqlx::query(
             r#"
             CREATE TABLE IF NOT EXISTS training_sessions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL,
                 exercises TEXT NOT NULL,
                 current_exercise_index INTEGER NOT NULL,
                 results TEXT NOT NULL,
                 strategies TEXT NOT NULL,
                 difficulty TEXT NOT NULL,
-                started_at TEXT NOT NULL,
-                finished_at TEXT,
+                started_at TIMESTAMPTZ NOT NULL,
+                finished_at TIMESTAMPTZ,
                 FOREIGN KEY (user_id) REFERENCES profiles(user_id)
             )
             "#,
@@ -118,7 +118,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn pool(&self) -> &SqlitePool {
+    pub fn pool(&self) -> &PgPool {
         &self.pool
     }
 }
@@ -128,8 +128,13 @@ mod tests {
     use super::*;
 
     #[tokio::test]
+    #[ignore] // Requires PostgreSQL instance
     async fn test_database_creation() {
-        let db = Database::new("sqlite::memory:").await.unwrap();
+        // Set DATABASE_URL environment variable to run this test
+        // Example: DATABASE_URL=postgresql://user:password@localhost/tacticus_test
+        let db_url = std::env::var("DATABASE_URL")
+            .unwrap_or_else(|_| "postgresql://postgres:postgres@localhost/tacticus_test".to_string());
+        let db = Database::new(&db_url).await.unwrap();
         assert!(db.init_schema().await.is_ok());
     }
 }

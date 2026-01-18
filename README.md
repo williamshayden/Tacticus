@@ -2,7 +2,7 @@
 
 An intelligent chess training application with a **real LLM coach** that learns your playing style and provides personalized, conversational coaching to help you improve.
 
-## 🌟 What Makes Tacticus Different?
+## What Makes Tacticus Different?
 
 ### Real LLM-Powered Coaching
 Unlike basic chess trainers, Tacticus uses a **sophisticated LLM agent** (via OpenRouter) that:
@@ -26,7 +26,7 @@ Instead of dumping all data into the context window or using complex RAG systems
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed explanation of why this approach is superior for chess training.
 
-## 🎯 Features
+## Features
 
 ### LLM Coach Capabilities
 - **Game Analysis**: Detailed, conversational breakdown of your games
@@ -54,7 +54,7 @@ Tacticus/
 │   ├── chess-trainer/     # Exercise generation and training sessions
 │   ├── chess-ai/          # Traditional ML playstyle analysis
 │   ├── chess-llm-agent/   # LLM coach with tool-calling
-│   ├── chess-storage/     # SQLite persistence + tool executors
+│   ├── chess-storage/     # PostgreSQL persistence + tool executors
 │   └── chess-gui/         # Desktop app with egui
 ├── .env                   # OpenRouter API key (gitignored)
 ├── ARCHITECTURE.md        # Detailed tool-calling architecture
@@ -68,7 +68,7 @@ Tacticus/
 ### Prerequisites
 - **Rust 1.75+** (for latest egui features)
 - **OpenRouter API Key** (get free credits at [openrouter.ai](https://openrouter.ai))
-- **SQLite 3**
+- **PostgreSQL 14+** (with a running database instance)
 
 ### Setup
 
@@ -77,9 +77,10 @@ Tacticus/
 git clone <repository-url>
 cd Tacticus
 
-# Set up your OpenRouter API key
+# Set up your environment variables
 echo "OPENROUTER_API_KEY=sk-or-v1-your-key-here" > .env
 echo "OPENROUTER_BASE_URL=https://openrouter.ai/api/v1" >> .env
+echo "DATABASE_URL=postgresql://user:password@localhost/tacticus" >> .env
 
 # Build and run the desktop app
 cargo run --release
@@ -100,11 +101,11 @@ cargo run
 
 The GUI provides five main views:
 
-- 🏠 **Home**: Chat with your AI coach - ask questions, get insights, discuss strategy
-- ♟️ **Play**: Play games on an interactive chess board
-- 📚 **Train**: Complete 5-10 personalized exercises tailored to your weaknesses
-- 🔍 **Analyze**: Review your games with AI-powered move-by-move analysis
-- 👤 **Profile**: Track your rating, progress, style, and improvement trends
+- **Home**: Chat with your AI coach - ask questions, get insights, discuss strategy
+- **Play**: Play games on an interactive chess board
+- **Train**: Complete 5-10 personalized exercises tailored to your weaknesses
+- **Analyze**: Review your games with AI-powered move-by-move analysis
+- **Profile**: Track your rating, progress, style, and improvement trends
 
 ### How It Works
 
@@ -165,7 +166,7 @@ The system includes multiple exercise categories:
 - **Chess Library**: `chess` crate for board representation and move generation
 - **GUI Framework**: `egui` for native desktop UI
 - **LLM Integration**: OpenRouter API with tool-calling
-- **Database**: SQLite with `sqlx` for async operations
+- **Database**: PostgreSQL with `sqlx` for async operations
 - **Async Runtime**: `tokio`
 - **Serialization**: `serde` and `serde_json`
 
@@ -174,7 +175,7 @@ The system includes multiple exercise categories:
 The application is designed to scale infinitely:
 
 - **Modular Architecture**: Easy to add new exercise types, strategies, and analysis methods
-- **Extensible Storage**: SQLite for local use, easily adaptable to PostgreSQL for multi-user
+- **Extensible Storage**: PostgreSQL for robust multi-user support and scalability
 - **Stateless Analysis**: Each game analysis is independent and can be parallelized
 - **Efficient Caching**: Move evaluations can be cached for faster analysis
 - **Low Memory Footprint**: Streaming analysis for large game collections
