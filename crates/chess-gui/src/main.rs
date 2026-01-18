@@ -88,10 +88,10 @@ struct TacticusApp {
 
     // Application state
     current_view: AppView,
+    is_first_run: bool,
 
     // Settings
     openrouter_key: String,
-    database_url: String,
 }
 
 #[derive(Default, PartialEq, Clone, Copy)]
@@ -110,16 +110,39 @@ impl Default for TacticusApp {
         // Try to load from .env
         dotenv::dotenv().ok();
         let openrouter_key = std::env::var("OPENROUTER_API_KEY").unwrap_or_default();
-        let database_url = std::env::var("DATABASE_URL").unwrap_or_else(|_|
-            "postgresql://postgres:postgres@localhost/tacticus".to_string()
-        );
+
+        // Check if this is first run (no API key configured)
+        let is_first_run = openrouter_key.is_empty();
+
+        let coach_response = if is_first_run {
+            "═══ WELCOME TO TACTICUS! ═══\n\n\
+            Your AI-powered chess training journey starts here!\n\n\
+            FIRST TIME SETUP:\n\
+            → Click 'SETTINGS' in the top right\n\
+            → Enter your OpenRouter API key\n\
+            → Click 'SAVE SETTINGS'\n\n\
+            Don't have an API key?\n\
+            → Visit https://openrouter.ai to get free credits\n\
+            → It takes less than 1 minute!\n\n\
+            Once configured, I'll be your personal chess coach, \
+            analyzing your games and helping you improve!".to_string()
+        } else {
+            "═══ WELCOME BACK! ═══\n\n\
+            Your AI Chess Coach is ready to help you improve!\n\n\
+            WHAT WOULD YOU LIKE TO DO?\n\
+            → PLAY - Start a new game and practice\n\
+            → TRAIN - Get personalized exercises\n\
+            → ANALYZE - Review your recent games\n\
+            → PROFILE - Check your progress\n\n\
+            Or just ask me anything about chess below!".to_string()
+        };
 
         Self {
             user_input: String::new(),
-            coach_response: "Welcome to Tacticus! Your AI Chess Coach is ready to help you improve.\n\nI'll analyze your games, provide personalized training exercises, and help you understand your unique playing style.\n\nLet's start by playing a game or reviewing one of your recent matches!\n\n⚠️ Make sure to configure your OpenRouter API key in Settings first!".to_string(),
+            coach_response,
             current_view: AppView::Home,
+            is_first_run,
             openrouter_key,
-            database_url,
         }
     }
 }
@@ -476,25 +499,35 @@ impl TacticusApp {
                             egui::RichText::new("⚠ No API key set - AI features will not work!")
                                 .color(egui::Color32::from_rgb(200, 0, 0))
                         } else {
-                            egui::RichText::new("✓ API key configured")
+                            egui::RichText::new("✓ API key configured - Ready to train!")
                                 .color(egui::Color32::from_rgb(0, 150, 0))
                         };
                         ui.label(status_text);
+
+                        ui.add_space(16.0);
+
+                        if self.is_first_run && !self.openrouter_key.is_empty() {
+                            let hint = egui::RichText::new("💡 Don't forget to click 'SAVE SETTINGS' below!")
+                                .color(egui::Color32::from_rgb(200, 120, 0))
+                                .size(14.0)
+                                .strong();
+                            ui.label(hint);
+                        }
                     });
                 });
 
                 ui.add_space(20.0);
 
-                // Database URL
+                // Database info (read-only)
                 egui::Frame {
-                    fill: egui::Color32::WHITE,
-                    stroke: egui::Stroke::new(2.0, egui::Color32::from_rgb(100, 100, 100)),
+                    fill: egui::Color32::from_rgb(250, 250, 250),
+                    stroke: egui::Stroke::new(2.0, egui::Color32::from_rgb(150, 150, 150)),
                     inner_margin: egui::Margin::same(16.0),
                     rounding: egui::Rounding::same(6.0),
                     ..Default::default()
                 }.show(ui, |ui| {
                     ui.vertical(|ui| {
-                        let label = egui::RichText::new("PostgreSQL Database URL")
+                        let label = egui::RichText::new("Database Storage")
                             .size(16.0)
                             .strong()
                             .color(egui::Color32::from_rgb(0, 84, 166));
@@ -502,18 +535,17 @@ impl TacticusApp {
 
                         ui.add_space(8.0);
 
-                        ui.label("Default: postgresql://postgres:postgres@localhost/tacticus");
+                        ui.label("✓ Local SQLite database (automatically configured)");
+                        ui.label("✓ Your data is stored locally on your computer");
+                        ui.label("✓ No internet connection required for storage");
 
-                        ui.add_space(12.0);
+                        ui.add_space(8.0);
 
-                        ui.horizontal(|ui| {
-                            ui.label("URL:");
-                            ui.add_space(10.0);
-
-                            let db_input = egui::TextEdit::singleline(&mut self.database_url)
-                                .desired_width(500.0);
-                            ui.add(db_input);
-                        });
+                        // Show database location
+                        if let Some(data_dir) = dirs::data_local_dir() {
+                            let db_path = data_dir.join("tacticus").join("chess_training.db");
+                            ui.label(format!("Location: {}", db_path.display()));
+                        }
                     });
                 });
 
@@ -530,8 +562,17 @@ impl TacticusApp {
 
                     if ui.add(save_button).clicked() {
                         // Save to .env file
-                        if let Err(e) = self.save_settings() {
-                            eprintln!("Failed to save settings: {}", e);
+                        match self.save_settings() {
+                            Ok(_) => {
+                                self.is_first_run = false;
+                                self.coach_response = "✓ Settings saved successfully!\n\n\
+                                    Your API key has been configured.\n\n\
+                                    You're all set! Click 'HOME' to start your chess training journey.".to_string();
+                            }
+                            Err(e) => {
+                                eprintln!("Failed to save settings: {}", e);
+                                self.coach_response = format!("⚠ Error saving settings: {}\n\nPlease try again.", e);
+                            }
                         }
                     }
                 });
@@ -539,18 +580,17 @@ impl TacticusApp {
                 ui.add_space(10.0);
 
                 ui.vertical_centered(|ui| {
-                    ui.label("Settings are saved to .env file in the application directory");
+                    ui.label("Settings are saved to .env file in the current directory");
                 });
             });
         });
     }
 
-    fn save_settings(&self) -> std::io::Result<()> {
+    fn save_settings(&mut self) -> std::io::Result<()> {
         use std::io::Write;
         let mut file = std::fs::File::create(".env")?;
         writeln!(file, "OPENROUTER_API_KEY={}", self.openrouter_key)?;
         writeln!(file, "OPENROUTER_BASE_URL=https://openrouter.ai/api/v1")?;
-        writeln!(file, "DATABASE_URL={}", self.database_url)?;
         Ok(())
     }
 
