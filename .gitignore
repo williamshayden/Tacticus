@@ -1,1 +1,41 @@
+# Rust
+target/
 /target
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# API Keys and Secrets - CRITICAL: Never commit these!
+.env
+.env.local
+*.key
+sk-or-v1-*
+openrouter.key
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+*.log
+
+# Node (for Tauri frontend)
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Tauri
+src-tauri/target/

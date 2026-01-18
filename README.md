@@ -1,126 +1,119 @@
-# Tacticus - Adaptive Chess Training AI
+# Tacticus - AI Chess Coach
 
-An intelligent chess training application built in Rust that learns your playing style and provides personalized exercises to improve your chess skills.
+An intelligent chess training application with a **real LLM coach** that learns your playing style and provides personalized, conversational coaching to help you improve.
 
-## Features
+## 🌟 What Makes Tacticus Different?
 
-### 🎯 Adaptive Learning
-- **AI-Powered Analysis**: Advanced algorithms analyze your games to identify strengths and weaknesses
-- **Personalized Training**: Generates custom exercise sets (5-10 exercises) based on your specific needs
-- **Play Style Recognition**: Identifies whether you're aggressive, tactical, positional, solid, or balanced
-- **Progressive Difficulty**: Automatically adjusts challenge level based on your performance
+### Real LLM-Powered Coaching
+Unlike basic chess trainers, Tacticus uses a **sophisticated LLM agent** (via OpenRouter) that:
+- Analyzes your games and provides **natural language feedback**
+- Has **conversational memory** - remembers your goals, weaknesses, and progress
+- Uses **tool-calling** to intelligently query your game database for relevant insights
+- Provides **personalized training plans** tailored to your unique playing style
+- Offers **encouragement and motivation** like a real coach
 
-### 🎮 Core Functionality
-1. **Training Sessions**: Complete personalized exercise sets with hints and explanations
-2. **Practice Games**: Play against the computer with real-time analysis
-3. **Game Analysis**: Detailed move-by-move breakdown of your games
-4. **Progress Tracking**: Persistent storage of your games, exercises, and improvement over time
+### Desktop Native GUI
+- Built with **egui** for a smooth, native desktop experience
+- No web browser required - true desktop performance
+- Beautiful, intuitive interface for playing, training, and analyzing
 
-### 🧠 Learning Agent Capabilities
-- Analyzes your move quality (Brilliant, Great, Good, Inaccuracy, Mistake, Blunder)
-- Identifies tactical patterns and strategic themes
-- Tracks centipawn loss to measure accuracy
-- Provides actionable feedback and focus areas
-- Adapts training based on game phase weaknesses (opening, middlegame, endgame)
+### Intelligent Tool-Calling System
+Instead of dumping all data into the context window or using complex RAG systems, Tacticus uses **smart tool-calling**:
+- LLM coach decides what data it needs ("show me games where I blundered")
+- Queries structured database with precision
+- Gets exact data, not semantic similarity
+- More efficient, faster, and cost-effective
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed explanation of why this approach is superior for chess training.
+
+## 🎯 Features
+
+### LLM Coach Capabilities
+- **Game Analysis**: Detailed, conversational breakdown of your games
+- **Playstyle Insights**: Understands if you're aggressive, tactical, positional, or solid
+- **Personalized Training**: Creates custom exercises based on your specific weaknesses
+- **Progress Tracking**: Remembers your improvement journey and adapts coaching
+- **Natural Conversation**: Chat freely with your coach about chess concepts
+- **Motivational Support**: Provides encouragement and celebrates your improvements
+
+### Core Functionality
+1. **Play**: Interactive chess board to play against the engine
+2. **Train**: 5-10 personalized exercises with LLM coach hints
+3. **Analyze**: Deep game analysis with natural language feedback
+4. **Profile**: Track rating, style, stats, and improvement trends
 
 ## Architecture
 
-The application is built as a modular Rust workspace with six crates:
+The application is built as a modular Rust workspace:
 
 ```
-chess-trainer-app/
+Tacticus/
 ├── crates/
-│   ├── chess-core/       # Core chess logic, board representation
-│   ├── chess-engine/     # Move evaluation and game analysis
-│   ├── chess-trainer/    # Exercise generation and training sessions
-│   ├── chess-ai/         # AI agent for playstyle analysis
-│   ├── chess-storage/    # SQLite persistence layer
-│   └── chess-cli/        # Command-line interface
-└── Cargo.toml            # Workspace configuration
+│   ├── chess-core/        # Core chess logic, board representation
+│   ├── chess-engine/      # Move evaluation and game analysis
+│   ├── chess-trainer/     # Exercise generation and training sessions
+│   ├── chess-ai/          # Traditional ML playstyle analysis
+│   ├── chess-llm-agent/   # LLM coach with tool-calling
+│   ├── chess-storage/     # SQLite persistence + tool executors
+│   └── chess-gui/         # Desktop app with egui
+├── .env                   # OpenRouter API key (gitignored)
+├── ARCHITECTURE.md        # Detailed tool-calling architecture
+└── Cargo.toml             # Workspace configuration
 ```
+
+**Key Innovation**: The `chess-llm-agent` crate implements a tool-calling system where the LLM coach can query your chess database with precision instead of using RAG or context stuffing.
 
 ## Installation
 
 ### Prerequisites
-- Rust 1.70 or higher
-- SQLite 3
+- **Rust 1.75+** (for latest egui features)
+- **OpenRouter API Key** (get free credits at [openrouter.ai](https://openrouter.ai))
+- **SQLite 3**
 
-### Build from Source
+### Setup
 
 ```bash
 # Clone the repository
 git clone <repository-url>
 cd Tacticus
 
-# Build the project
-cargo build --release
+# Set up your OpenRouter API key
+echo "OPENROUTER_API_KEY=sk-or-v1-your-key-here" > .env
+echo "OPENROUTER_BASE_URL=https://openrouter.ai/api/v1" >> .env
 
-# The binary will be at target/release/chess-cli
+# Build and run the desktop app
+cargo run --release
+
+# Or build for distribution
+cargo build --release
+# The binary will be at target/release/tacticus
 ```
+
+**Important**: Never commit your `.env` file! It's in `.gitignore` to protect your API key.
 
 ## Usage
 
-### Initialize the Database
-
-First time setup:
+Run the native desktop app:
 ```bash
-chess-cli init
+cargo run
 ```
 
-### Start a Training Session
+The GUI provides five main views:
 
-```bash
-chess-cli train
-```
+- 🏠 **Home**: Chat with your AI coach - ask questions, get insights, discuss strategy
+- ♟️ **Play**: Play games on an interactive chess board
+- 📚 **Train**: Complete 5-10 personalized exercises tailored to your weaknesses
+- 🔍 **Analyze**: Review your games with AI-powered move-by-move analysis
+- 👤 **Profile**: Track your rating, progress, style, and improvement trends
 
-This will:
-1. Load or create your player profile
-2. Analyze your weaknesses from previous games
-3. Generate 5-10 personalized exercises
-4. Guide you through each exercise with hints
-5. Update your profile based on performance
+### How It Works
 
-### Play a Practice Game
+The AI coach uses sophisticated tool-calling to analyze your games:
 
-```bash
-# Play as white (default)
-chess-cli play
-
-# Play as black
-chess-cli play --color black
-```
-
-After the game:
-- Your moves are analyzed for quality
-- The AI identifies your strengths and weaknesses
-- You receive personalized recommendations
-- The game is saved to your history
-
-### View Your Profile
-
-```bash
-chess-cli profile
-```
-
-Displays:
-- Skill level and estimated rating
-- Play style characteristics
-- Games played and exercises completed
-- Current strengths and weaknesses
-- Style breakdown (aggression, tactical, positional, etc.)
-
-### Analyze Your Games
-
-```bash
-chess-cli analyze
-```
-
-Provides:
-- Move-by-move analysis of your most recent game
-- Quality annotations for each move
-- Best move alternatives
-- Centipawn loss calculations
-- Statistical summary
+1. **Play games** - The coach observes your moves without assistance
+2. **Get analysis** - LLM coach queries your game database for specific insights
+3. **Receive training** - Personalized exercises based on identified weaknesses
+4. **Track progress** - Monitor your improvement over time with detailed stats
 
 ## Training Workflow
 
@@ -134,35 +127,26 @@ The application implements a complete adaptive learning cycle:
 
 ### Example Session
 
-```bash
-# Initialize database (first time only)
-$ chess-cli init
+1. **Launch Tacticus** - `cargo run`
 
-# Play a game to establish baseline
-$ chess-cli play
+2. **Navigate to Play** - Play a game on the interactive board
 
-# After the game, you'll see analysis:
-# "Your play style is: Tactical
-#  Strengths: Strong move selection, High accuracy
-#  Areas for improvement: Weak opening play - study opening principles
-#
-#  Recommendations:
-#  • Complete 7 exercises
-#  • Focus on: Opening Principles"
+3. **Get AI Analysis** - After the game, the LLM coach analyzes your moves:
+   - "I notice you favor tactical play - great for creating threats!"
+   - "However, you made early inaccuracies in the opening phase"
+   - "You lost about 150 centipawns in moves 4-7"
 
-# Start personalized training
-$ chess-cli train
+4. **Start Training** - Navigate to the Train view for personalized exercises:
+   - Each exercise targets your specific weaknesses
+   - Get hints from your AI coach when stuck
+   - Receive detailed explanations after solving
+   - Progress automatically tracked
 
-# Complete exercises tailored to your weaknesses
-# Each exercise provides:
-# - Clear objective
-# - Position to analyze
-# - Hints if needed
-# - Detailed explanation
-
-# Check your progress
-$ chess-cli profile
-```
+5. **Monitor Progress** - Check the Profile view to see:
+   - Rating trends over time
+   - Playing style analysis
+   - Strengths and improvement areas
+   - Training completion statistics
 
 ## Exercise Types
 
@@ -179,10 +163,11 @@ The system includes multiple exercise categories:
 
 - **Language**: Rust 2021 Edition
 - **Chess Library**: `chess` crate for board representation and move generation
+- **GUI Framework**: `egui` for native desktop UI
+- **LLM Integration**: OpenRouter API with tool-calling
 - **Database**: SQLite with `sqlx` for async operations
-- **CLI Framework**: `clap` for command-line parsing
-- **UI**: `colored` for terminal formatting
 - **Async Runtime**: `tokio`
+- **Serialization**: `serde` and `serde_json`
 
 ## Scalability
 
@@ -200,12 +185,13 @@ Potential improvements:
 - [ ] Integration with Stockfish for stronger engine analysis
 - [ ] Opening book and repertoire training
 - [ ] Spaced repetition for exercise review
-- [ ] Multiplayer support
-- [ ] Web interface
+- [ ] Multiplayer support with peer-to-peer connections
 - [ ] Import/export PGN files
 - [ ] Tournament mode
 - [ ] Puzzle rush feature
 - [ ] Video lessons integration
+- [ ] Chess board themes and customization
+- [ ] Voice interaction with AI coach
 
 ## Contributing
 
@@ -232,7 +218,5 @@ MIT License - see LICENSE file for details
 **Start your chess improvement journey today!**
 
 ```bash
-cargo build --release
-./target/release/chess-cli init
-./target/release/chess-cli play
+cargo run --release
 ```

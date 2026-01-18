@@ -1,5 +1,5 @@
 [package]
-name = "chess-cli"
+name = "chess-llm-agent"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -8,13 +8,13 @@ license.workspace = true
 [dependencies]
 chess-core = { path = "../chess-core" }
 chess-engine = { path = "../chess-engine" }
-chess-trainer = { path = "../chess-trainer" }
 chess-ai = { path = "../chess-ai" }
-chess-storage = { path = "../chess-storage" }
-chess = { workspace = true }
-clap = { workspace = true }
-colored = { workspace = true }
+reqwest = { workspace = true }
 tokio = { workspace = true }
-anyhow = { workspace = true }
+serde = { workspace = true }
 serde_json = { workspace = true }
-chrono = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+dotenv = { workspace = true }
+tracing = { workspace = true }
