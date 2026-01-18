@@ -1,7 +1,7 @@
 use eframe::egui;
 
 fn main() -> Result<(), eframe::Error> {
-    env_logger::init();
+    tracing_subscriber::fmt::init();
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
@@ -13,7 +13,7 @@ fn main() -> Result<(), eframe::Error> {
     eframe::run_native(
         "Tacticus",
         options,
-        Box::new(|_cc| Box::<TacticusApp>::default()),
+        Box::new(|_cc| Ok(Box::<TacticusApp>::default())),
     )
 }
 
@@ -51,14 +51,14 @@ impl eframe::App for TacticusApp {
         // Top menu bar
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
-                ui.heading("🎯 Tacticus");
+                ui.heading("Tacticus");
                 ui.separator();
 
-                ui.selectable_value(&mut self.current_view, AppView::Home, "🏠 Home");
-                ui.selectable_value(&mut self.current_view, AppView::Play, "♟️ Play");
-                ui.selectable_value(&mut self.current_view, AppView::Train, "📚 Train");
-                ui.selectable_value(&mut self.current_view, AppView::Analyze, "🔍 Analyze");
-                ui.selectable_value(&mut self.current_view, AppView::Profile, "👤 Profile");
+                ui.selectable_value(&mut self.current_view, AppView::Home, "Home");
+                ui.selectable_value(&mut self.current_view, AppView::Play, "Play");
+                ui.selectable_value(&mut self.current_view, AppView::Train, "Train");
+                ui.selectable_value(&mut self.current_view, AppView::Analyze, "Analyze");
+                ui.selectable_value(&mut self.current_view, AppView::Profile, "Profile");
             });
         });
 
@@ -86,7 +86,7 @@ impl TacticusApp {
             // Coach panel
             egui::Frame::group(ui.style()).show(ui, |ui| {
                 ui.set_min_width(800.0);
-                ui.heading("💬 Your AI Coach");
+                ui.heading("Your AI Coach");
 
                 egui::ScrollArea::vertical()
                     .max_height(300.0)
