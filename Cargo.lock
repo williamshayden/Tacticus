@@ -807,6 +807,7 @@ dependencies = [
  "chess-storage",
  "chess-trainer",
  "chrono",
+ "dotenv",
  "eframe",
  "egui",
  "egui_extras",
