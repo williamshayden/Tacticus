@@ -7,8 +7,8 @@ members = [
     "crates/chess-storage",
     "crates/chess-llm-agent",
     "crates/chess-gui",
-    "crates/chess-cli",
 ]
+default-members = ["crates/chess-gui"]
 resolver = "2"
 
 [workspace.package]
@@ -30,10 +30,6 @@ async-trait = "0.1"
 sqlx = { version = "0.7", features = ["runtime-tokio-native-tls", "sqlite", "postgres"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-
-# CLI
-clap = { version = "4.4", features = ["derive"] }
-colored = "2.1"
 
 # Error handling
 anyhow = "1.0"
