@@ -1,4 +1,5 @@
 .chess-board-container {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -30,4 +31,61 @@
   font-size: 11px;
   color: #d4b896;
   font-weight: 600;
+}
+
+/* Promotion Dialog */
+.promotion-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.promotion-dialog {
+  background: linear-gradient(to bottom, #f8f8f0, #e8e8e0);
+  border: 2px solid var(--xp-chrome-mid, #0a246a);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.promotion-title {
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.promotion-pieces {
+  display: flex;
+  gap: 8px;
+}
+
+.promotion-piece {
+  width: 60px;
+  height: 60px;
+  font-size: 36px;
+  font-family: 'Segoe UI Symbol', 'DejaVu Sans', sans-serif;
+  background: linear-gradient(to bottom, #fff, #e0e0d0);
+  border: 2px solid #999;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s ease;
+}
+
+.promotion-piece:hover {
+  background: linear-gradient(to bottom, #e8f4ff, #d0e8ff);
+  border-color: var(--xp-chrome-mid, #0a246a);
+  transform: scale(1.05);
+}
+
+.promotion-piece:active {
+  transform: scale(0.98);
 }

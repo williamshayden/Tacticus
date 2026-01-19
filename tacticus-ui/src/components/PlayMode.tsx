@@ -36,11 +36,11 @@ export const PlayMode: React.FC<PlayModeProps> = ({ onBack, isCalibration = fals
     setShowConfig(false);
   };
 
-  const handleMove = (from: string, to: string): boolean => {
+  const handleMove = (from: string, to: string, promotion?: string): boolean => {
     if (!gameState || isThinking) return false;
     if (gameState.turn !== playerColor) return false;
     
-    makeMove(from, to);
+    makeMove(from, to, promotion);
     return true;
   };
 
