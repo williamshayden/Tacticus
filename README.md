@@ -204,7 +204,7 @@ MIT License - see LICENSE file for details
 - Chess logic powered by the `chess` crate
 - Inspired by modern chess training platforms like Chess.com and Lichess
 - Named after Jernau Morat Gurgeh from Iain M. Banks' "The Player of Games"
-- Built with Rust and React for performance and beautiful UI
+- Built with Rust and React for performance and quality UI
 
 ---
 
