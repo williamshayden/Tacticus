@@ -1,0 +1,254 @@
+.learn-mode-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.learn-layout {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.loading-message {
+  padding: 40px;
+  background: var(--xp-window-bg);
+  border-radius: 8px;
+}
+
+/* Category List */
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  text-align: left;
+  color: var(--xp-text-dark);
+}
+
+.category-item:hover {
+  background: rgba(0, 100, 200, 0.1);
+}
+
+.category-item.active {
+  background: var(--xp-chrome-mid);
+  color: white;
+}
+
+.concept-count {
+  margin-left: auto;
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+/* Concept List */
+.concept-search {
+  margin-bottom: 8px;
+}
+
+.concept-search .xp-input {
+  width: 100%;
+}
+
+.concept-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.concept-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid var(--xp-btn-shadow);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+.concept-item:hover {
+  background: #f5f5f0;
+  border-color: var(--xp-chrome-mid);
+}
+
+.concept-item.active {
+  background: linear-gradient(to bottom, #e8f4ff, #d0e8ff);
+  border-color: var(--xp-chrome-mid);
+}
+
+.concept-name {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.concept-difficulty {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+.concept-difficulty.beginner {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.concept-difficulty.intermediate {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.concept-difficulty.advanced {
+  background: #fce4ec;
+  color: #c62828;
+}
+
+/* Concept Detail */
+.concept-detail-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.concept-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.concept-header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.concept-category {
+  font-size: 11px;
+  padding: 2px 8px;
+  background: var(--xp-btn-face);
+  border: 1px solid var(--xp-btn-shadow);
+  border-radius: 4px;
+}
+
+.concept-short {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--xp-chrome-dark);
+  margin: 0;
+  font-style: italic;
+}
+
+.concept-example {
+  display: flex;
+  justify-content: center;
+  padding: 12px;
+  background: var(--xp-window-bg-dark);
+  border-radius: 4px;
+}
+
+.concept-explanation {
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.concept-explanation p {
+  margin: 0 0 12px 0;
+}
+
+.concept-explanation p:last-child {
+  margin-bottom: 0;
+}
+
+.related-concepts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.related-concepts label {
+  font-size: 11px;
+  color: var(--xp-btn-dark);
+}
+
+.related-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.related-tag {
+  padding: 4px 10px;
+  background: var(--xp-btn-face);
+  border: 1px solid var(--xp-btn-shadow);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+}
+
+.related-tag:hover {
+  background: var(--xp-chrome-mid);
+  color: white;
+}
+
+.concept-actions {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--xp-btn-shadow);
+}
+
+/* Placeholder */
+.concept-placeholder {
+  display: flex;
+  align-items: flex-start;
+}
+
+.placeholder-content {
+  text-align: center;
+  padding: 20px;
+}
+
+.placeholder-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.placeholder-content h3 {
+  margin: 0 0 8px 0;
+  color: var(--xp-chrome-dark);
+}
+
+.placeholder-content p {
+  margin: 0 0 12px 0;
+  font-size: 12px;
+  color: var(--xp-btn-dark);
+}
+
+.placeholder-content ul {
+  text-align: left;
+  font-size: 12px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.placeholder-content li {
+  margin: 4px 0;
+}

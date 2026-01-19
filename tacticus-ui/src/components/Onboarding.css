@@ -1,0 +1,135 @@
+.onboarding-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 40px;
+}
+
+.onboarding-step {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.onboarding-gurgeh {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: linear-gradient(to bottom, #f0f8ff, #e0f0ff);
+  border: 1px solid var(--xp-chrome-mid);
+  border-radius: 4px;
+}
+
+.gurgeh-avatar {
+  font-size: 48px;
+  flex-shrink: 0;
+}
+
+.gurgeh-speech {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.gurgeh-speech p {
+  margin: 0;
+}
+
+.onboarding-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.onboarding-form label {
+  font-weight: 600;
+  color: var(--xp-chrome-dark);
+}
+
+.onboarding-input {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+}
+
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.level-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px;
+  background: var(--xp-window-bg);
+  border: 2px solid;
+  border-color: var(--xp-btn-light) var(--xp-btn-shadow) var(--xp-btn-shadow) var(--xp-btn-light);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.1s;
+  font-family: inherit;
+}
+
+.level-card:hover {
+  background: #f5f5f0;
+  transform: translateY(-2px);
+}
+
+.level-card.selected {
+  border-color: var(--xp-chrome-mid);
+  background: linear-gradient(to bottom, #e8f4ff, #d0e8ff);
+  box-shadow: 0 0 0 2px var(--xp-chrome-light);
+}
+
+.level-icon {
+  font-size: 32px;
+}
+
+.level-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--xp-chrome-dark);
+}
+
+.level-elo {
+  font-size: 11px;
+  color: var(--xp-btn-dark);
+}
+
+.level-desc {
+  font-size: 11px;
+  color: var(--xp-text-dark);
+  text-align: center;
+}
+
+.custom-elo-input {
+  width: 80px;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.onboarding-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #fffef0;
+  border: 1px solid #e0d080;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #806000;
+}
+
+.onboarding-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--xp-btn-shadow);
+}

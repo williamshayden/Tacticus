@@ -1,0 +1,81 @@
+.app-content {
+  position: absolute;
+  inset: 0;
+  bottom: 36px; /* Leave room for taskbar */
+  overflow: auto;
+  padding: 20px;
+}
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.loading-text {
+  background: var(--xp-window-bg);
+  padding: 20px 40px;
+  border-radius: 4px;
+  font-size: 14px;
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+}
+
+.placeholder-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 40px;
+  background: var(--xp-window-bg);
+  border-radius: 8px;
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+  max-width: 400px;
+  margin: 100px auto;
+  text-align: center;
+}
+
+.placeholder-view h2 {
+  color: var(--xp-chrome-dark);
+  margin: 0;
+}
+
+.placeholder-view p {
+  color: var(--xp-btn-dark);
+  margin: 0;
+}
+
+.api-key-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 16px;
+  background: linear-gradient(to bottom, #ffe080, #ffc020);
+  border-bottom: 2px solid #c09000;
+  color: #604000;
+  font-size: 12px;
+  text-align: center;
+  cursor: pointer;
+  z-index: 3000;
+}
+
+.api-key-banner:hover {
+  background: linear-gradient(to bottom, #fff0a0, #ffd040);
+}
+
+.xp-tray-button {
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 2px 6px;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.xp-tray-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}

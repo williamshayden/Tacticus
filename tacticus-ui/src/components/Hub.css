@@ -1,0 +1,153 @@
+.hub-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+  padding-top: 40px;
+}
+
+.hub-stats-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: linear-gradient(to bottom, #ffffff, #f4f0e8);
+  border: 1px solid var(--xp-btn-shadow);
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.hub-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+}
+
+.hub-stat-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--xp-btn-dark);
+}
+
+.hub-stat-value {
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--xp-chrome-dark);
+}
+
+.hub-stat-value.rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rating-change {
+  font-size: 12px;
+  color: #228b22;
+}
+
+.hub-stat-divider {
+  width: 1px;
+  height: 30px;
+  background: var(--xp-btn-shadow);
+}
+
+.hub-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.hub-card {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-description {
+  font-size: 12px;
+  color: var(--xp-btn-dark);
+  margin: 0 0 12px 0;
+}
+
+.card-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+
+.focus-tag,
+.format-tag {
+  padding: 2px 6px;
+  background: var(--xp-chrome-mid);
+  color: white;
+  border-radius: 2px;
+  font-size: 10px;
+}
+
+.card-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+  font-size: 11px;
+}
+
+.card-last-game {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  margin-bottom: 12px;
+}
+
+.game-result {
+  font-weight: bold;
+}
+
+.game-result.win {
+  color: #228b22;
+}
+
+.game-result.loss {
+  color: #dc3c3c;
+}
+
+.card-features {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  color: var(--xp-btn-dark);
+  margin-bottom: 12px;
+}
+
+.hub-card .xp-button {
+  margin-top: auto;
+}
+
+.hub-gurgeh-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(to bottom, #e8f4ff, #d0e8ff);
+  border: 1px solid var(--xp-chrome-mid);
+  border-radius: 4px;
+}
+
+.gurgeh-icon {
+  font-size: 32px;
+}
+
+.gurgeh-text {
+  flex: 1;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.gurgeh-text strong {
+  color: var(--xp-chrome-dark);
+}

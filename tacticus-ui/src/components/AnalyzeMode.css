@@ -1,0 +1,123 @@
+.analyze-mode-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.analyze-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.analyze-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Position Section */
+.position-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.position-section label {
+  font-size: 11px;
+  color: var(--xp-btn-dark);
+}
+
+.fen-input {
+  width: 100%;
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.position-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Analysis Tools */
+.analysis-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.analysis-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.eval-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.eval-bar {
+  width: 100%;
+  height: 20px;
+  background: #333;
+  border: 1px solid var(--xp-btn-shadow);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.eval-white {
+  height: 100%;
+  background: linear-gradient(to right, #666, #fff);
+  transition: width 0.3s ease;
+}
+
+.eval-value {
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--xp-chrome-dark);
+}
+
+.analysis-output {
+  font-family: monospace;
+  font-size: 11px;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+/* Gurgeh Analysis */
+.gurgeh-analysis {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gurgeh-intro {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--xp-btn-dark);
+  margin: 0;
+}
+
+.gurgeh-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.analyze-back {
+  margin-top: auto;
+}
+
+.api-key-notice {
+  padding: 8px;
+  margin-top: 8px;
+  background: #fffef0;
+  border: 1px solid #e0c060;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #806000;
+  text-align: center;
+}

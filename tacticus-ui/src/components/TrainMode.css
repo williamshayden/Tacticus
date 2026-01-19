@@ -1,0 +1,186 @@
+.train-mode-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.train-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.train-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loading-message {
+  padding: 40px;
+  background: var(--xp-window-bg);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+/* Exercise Info */
+.exercise-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.exercise-title {
+  margin: 0;
+  font-size: 16px;
+  color: var(--xp-chrome-dark);
+}
+
+.exercise-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.difficulty {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #f0f0e8;
+}
+
+.difficulty.beginner {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.difficulty.intermediate {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.difficulty.advanced {
+  background: #fce4ec;
+  color: #c62828;
+}
+
+.exercise-type {
+  font-size: 10px;
+  padding: 2px 6px;
+  background: var(--xp-chrome-mid);
+  color: white;
+  border-radius: 2px;
+}
+
+.exercise-description {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.hint-box {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  background: #fffef0;
+  border: 1px solid #e0d080;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.result-box {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.result-box.correct {
+  background: linear-gradient(to bottom, #e8f5e9, #c8e6c9);
+  border: 1px solid #4caf50;
+}
+
+.result-box.incorrect {
+  background: linear-gradient(to bottom, #ffebee, #ffcdd2);
+  border: 1px solid #f44336;
+}
+
+.result-box span:first-child {
+  font-size: 24px;
+}
+
+.result-box p {
+  margin: 0 0 4px 0;
+  line-height: 1.5;
+}
+
+.correct-move {
+  font-weight: 600;
+  color: var(--xp-chrome-dark);
+}
+
+.exercise-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Session Progress */
+.session-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.progress-stats {
+  display: flex;
+  justify-content: space-around;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--xp-chrome-dark);
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--xp-btn-dark);
+  text-transform: uppercase;
+}
+
+.focus-areas {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.focus-areas label {
+  font-size: 11px;
+  color: var(--xp-btn-dark);
+}
+
+.focus-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.focus-tag {
+  font-size: 10px;
+  padding: 2px 8px;
+  background: var(--xp-chrome-mid);
+  color: white;
+  border-radius: 2px;
+}
+
+.session-actions {
+  padding-top: 8px;
+  border-top: 1px solid var(--xp-btn-shadow);
+}

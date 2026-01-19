@@ -1,0 +1,90 @@
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.api-key-section {
+  margin-top: 8px;
+}
+
+.settings-description {
+  margin: 0 0 12px 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.api-key-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.api-key-input {
+  flex: 1;
+  font-family: monospace;
+}
+
+.api-key-help {
+  font-size: 11px;
+  color: var(--xp-btn-dark);
+  background: #f8f8f4;
+  padding: 12px;
+  border: 1px solid var(--xp-btn-shadow);
+  border-radius: 4px;
+}
+
+.api-key-help p {
+  margin: 0 0 8px 0;
+}
+
+.api-key-help ol {
+  margin: 0 0 12px 0;
+  padding-left: 20px;
+}
+
+.api-key-help li {
+  margin: 4px 0;
+}
+
+.api-key-help a {
+  color: var(--xp-chrome-dark);
+}
+
+.api-key-help .note {
+  font-style: italic;
+  color: #666;
+  margin-bottom: 0;
+}
+
+.settings-status {
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: monospace;
+}
+
+.status-ok {
+  color: #228b22;
+}
+
+.status-warning {
+  color: #b8860b;
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 8px;
+  border-top: 1px solid var(--xp-btn-shadow);
+}

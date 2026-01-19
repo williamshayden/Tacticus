@@ -1,0 +1,1 @@
+export { ChessTerm } from './ChessTerm';
