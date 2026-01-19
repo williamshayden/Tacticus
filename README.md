@@ -187,13 +187,30 @@ cd src-tauri && cargo test  # Rust tests
 
 ## Contributing
 
-Contributions are welcome! Areas for contribution:
-- Additional exercise content
-- New tactical patterns
-- Enhanced evaluation functions
-- UI/UX improvements
-- Documentation
-- Tests
+We welcome contributions! Please read our **[Contributing Guide](CONTRIBUTING.md)** before submitting a pull request.
+
+### Quick Overview
+
+1. **Fork** the repository
+2. **Create a branch** (`feature/your-feature` or `fix/your-fix`)
+3. **Make changes** following our code style
+4. **Test** your changes (`npm run build` and `cargo test --workspace`)
+5. **Submit a PR** - all PRs require maintainer approval
+
+### Branch Protection
+
+The `main` branch is protected:
+- All changes must go through pull requests
+- PRs require approval from code owners before merging
+- Direct pushes to `main` are not allowed
+
+### Areas for Contribution
+
+- **Good First Issues**: Documentation, tests, new chess concepts
+- **Intermediate**: New exercise types, UI enhancements
+- **Advanced**: Engine improvements, LLM tool enhancements
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines, code style, and setup instructions.
 
 ## License
 

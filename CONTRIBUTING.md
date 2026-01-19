@@ -133,6 +133,17 @@ docs(readme): add API key setup instructions
    - Testing done
 6. **Wait for review** - maintainer approval required
 
+#### Branch Protection
+
+The `main` branch is protected with the following rules:
+
+- **No direct pushes** - All changes must go through pull requests
+- **Required reviews** - PRs require approval from code owners
+- **Stale review dismissal** - Approvals are dismissed when new commits are pushed
+- **Conversation resolution** - All review comments must be resolved
+
+This ensures code quality and prevents accidental changes to the main branch.
+
 ### Code Style
 
 #### TypeScript/React
@@ -203,6 +214,48 @@ cargo test -p chess-engine  # Specific crate
 ## License
 
 By contributing, you agree that your contributions will be licensed under the MIT License.
+
+---
+
+## For Maintainers
+
+### Setting Up Branch Protection
+
+To configure branch protection on GitHub:
+
+1. Go to **Settings** → **Branches** in your repository
+
+2. Click **Add branch protection rule**
+
+3. Set **Branch name pattern** to `main`
+
+4. Enable the following options:
+   - [x] **Require a pull request before merging**
+     - [x] Require approvals (set to 1)
+     - [x] Require review from Code Owners
+     - [x] Dismiss stale pull request approvals when new commits are pushed
+   - [x] **Require conversation resolution before merging**
+   - [x] **Do not allow bypassing the above settings** (optional, applies rules to admins too)
+
+5. Click **Create** to save the rule
+
+### CODEOWNERS
+
+The `.github/CODEOWNERS` file specifies who must review PRs:
+
+```
+# All files require review from the owner
+* @williamshayden
+```
+
+To add more reviewers, edit this file:
+```
+# Frontend changes
+/tacticus-ui/ @williamshayden @frontend-reviewer
+
+# Rust changes  
+/crates/ @williamshayden @rust-reviewer
+```
 
 ---
 
