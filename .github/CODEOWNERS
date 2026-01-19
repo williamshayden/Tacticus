@@ -1,0 +1,5 @@
+# Code Owners - These users will be requested for review on all PRs
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global rule - owner reviews everything
+* @williamshayden

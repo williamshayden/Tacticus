@@ -4065,6 +4065,7 @@ dependencies = [
  "chess-engine",
  "chess-trainer",
  "chrono",
+ "dirs",
  "dotenv",
  "lazy_static",
  "rand 0.8.5",

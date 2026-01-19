@@ -8,6 +8,10 @@ use commands::*;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Initialize stored data on startup
+    commands::user::init_api_key();
+    commands::user::init_profile();
+    
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
@@ -34,7 +38,6 @@ pub fn run() {
             create_user_profile,
             update_user_elo,
             get_user_stats,
-            calculate_new_elo,
             save_api_key,
             get_api_key,
             has_completed_onboarding,

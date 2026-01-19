@@ -38,3 +38,4 @@ dotenv = "0.15"
 rand = "0.8"
 lazy_static = "1.4"
 reqwest = { workspace = true, features = ["json"] }
+dirs = "6.0.0"
