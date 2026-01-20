@@ -1,10 +1,18 @@
 mod commands;
+pub mod database;
 
-#[allow(unused_imports)]
 #[macro_use]
 extern crate lazy_static;
 
 use commands::*;
+use database::Database;
+use std::sync::Arc;
+
+lazy_static! {
+    pub static ref DB: Arc<Database> = Arc::new(
+        Database::new().expect("Failed to initialize database")
+    );
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -49,6 +57,20 @@ pub fn run() {
             get_concept_categories,
             define_term,
             get_related_concepts,
+            // Data commands (for AI agent and persistence)
+            save_game,
+            get_recent_games,
+            search_games_by_opening,
+            get_games_with_mistakes,
+            record_exercise_result,
+            get_training_progress,
+            get_player_stats,
+            get_improvement_trend,
+            get_weakness_history,
+            create_conversation,
+            add_message,
+            get_conversation_messages,
+            get_recent_conversations,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

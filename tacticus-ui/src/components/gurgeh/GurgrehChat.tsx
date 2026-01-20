@@ -1,29 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { XPWindow } from '../xp/XPWindow';
 import { XPButton } from '../xp/XPButton';
 import { useUserStore } from '../../stores/userStore';
+import { streamCoachResponse, getPersonalizedGreeting } from '../../lib/ai/agent';
+import { GREETING_PROMPT } from '../../lib/ai/prompts';
+import type { ChatMessage, CoachAction } from '../../lib/ai/types';
 import './GurgrehChat.css';
-
-interface CoachMessage {
-  role: string;
-  content: string;
-  timestamp: number;
-  actions: CoachAction[];
-}
-
-interface CoachAction {
-  action_type: string;
-  label: string;
-  data: string;
-}
-
-interface CoachResponse {
-  message: CoachMessage;
-  board_fen: string | null;
-  highlights: string[];
-  arrows: [string, string][];
-}
 
 interface GurgrehChatProps {
   onClose?: () => void;
@@ -32,81 +14,217 @@ interface GurgrehChatProps {
   position?: { x: number; y: number };
 }
 
+interface DisplayMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  actions: CoachAction[];
+  isStreaming?: boolean;
+}
+
 export const GurgrehChat: React.FC<GurgrehChatProps> = ({
   onClose,
   onAction,
   initialGreeting = true,
   position,
 }) => {
-  const [messages, setMessages] = useState<CoachMessage[]>([]);
+  const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const [input, setInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [toolActivity, setToolActivity] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { apiKey } = useUserStore();
-
-  useEffect(() => {
-    if (initialGreeting) {
-      loadGreeting();
-    }
-  }, [initialGreeting]);
+  const { apiKey, profile, stats } = useUserStore();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const loadGreeting = async () => {
-    try {
-      const response = await invoke<CoachResponse>('get_coach_greeting', {
-        userName: 'Player',
-        currentElo: 800,
-        exercisesCompleted: 0,
-      });
-      setMessages([response.message]);
-    } catch (err) {
-      console.error('Failed to load greeting:', err);
+  const loadGreeting = useCallback(async () => {
+    // If no API key, show static greeting
+    if (!apiKey) {
+      const greeting = GREETING_PROMPT(
+        profile?.name || 'Player',
+        stats?.current_elo || 800,
+        stats?.exercises_completed || 0
+      );
+      setMessages([{
+        role: 'assistant',
+        content: greeting,
+        actions: [
+          { action_type: 'start_training', label: 'Start Training', data: '' },
+          { action_type: 'play_game', label: 'Play a Game', data: '' },
+        ],
+      }]);
+      return;
     }
-  };
+
+    setIsLoading(true);
+    try {
+      const greeting = await getPersonalizedGreeting(
+        apiKey,
+        profile?.name || 'Player'
+      );
+      setMessages([{
+        role: 'assistant',
+        content: greeting,
+        actions: [
+          { action_type: 'start_training', label: 'Start Training', data: '' },
+          { action_type: 'play_game', label: 'Play a Game', data: '' },
+        ],
+      }]);
+    } catch (error) {
+      console.error('Failed to load greeting:', error);
+      // Fallback to static greeting
+      const greeting = GREETING_PROMPT(
+        profile?.name || 'Player',
+        stats?.current_elo || 800,
+        stats?.exercises_completed || 0
+      );
+      setMessages([{
+        role: 'assistant',
+        content: greeting,
+        actions: [
+          { action_type: 'start_training', label: 'Start Training', data: '' },
+          { action_type: 'play_game', label: 'Play a Game', data: '' },
+        ],
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [apiKey, profile?.name, stats?.current_elo, stats?.exercises_completed]);
+
+  useEffect(() => {
+    if (initialGreeting && messages.length === 0) {
+      loadGreeting();
+    }
+  }, [initialGreeting, messages.length, loadGreeting]);
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || !apiKey) return;
 
-    const userMessage: CoachMessage = {
+    const userMessage: DisplayMessage = {
       role: 'user',
       content: input,
-      timestamp: Date.now(),
       actions: [],
     };
 
+    // Add user message and prepare for assistant response
     setMessages(prev => [...prev, userMessage]);
     setInput('');
-    setIsTyping(true);
+    setIsLoading(true);
+
+    // Create streaming assistant message
+    const streamingMessage: DisplayMessage = {
+      role: 'assistant',
+      content: '',
+      actions: [],
+      isStreaming: true,
+    };
+    setMessages(prev => [...prev, streamingMessage]);
+
+    // Build chat history for context
+    const chatHistory: ChatMessage[] = messages
+      .filter(m => !m.isStreaming)
+      .map(m => ({
+        role: m.role,
+        content: m.content,
+      }));
+    chatHistory.push({ role: 'user', content: input });
 
     try {
-      const response = await invoke<CoachResponse>('chat_with_coach', {
-        message: input,
-        context: null,
-        apiKey: apiKey,
-      });
-
-      setMessages(prev => [...prev, response.message]);
-    } catch (err) {
-      console.error('Failed to send message:', err);
-      const errorMessage: CoachMessage = {
-        role: 'gurgeh',
-        content: `I encountered an error: ${err}. Please check your API key in Settings.`,
-        timestamp: Date.now(),
-        actions: [
-          {
-            action_type: 'open_settings',
-            label: 'Open Settings',
-            data: '',
+      await streamCoachResponse(
+        apiKey,
+        chatHistory,
+        {
+          onChunk: (chunk) => {
+            setMessages(prev => {
+              const updated = [...prev];
+              const lastIdx = updated.length - 1;
+              if (updated[lastIdx].isStreaming) {
+                updated[lastIdx] = {
+                  ...updated[lastIdx],
+                  content: updated[lastIdx].content + chunk,
+                };
+              }
+              return updated;
+            });
           },
-        ],
-      };
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsTyping(false);
+          onComplete: (fullText) => {
+            setMessages(prev => {
+              const updated = [...prev];
+              const lastIdx = updated.length - 1;
+              if (updated[lastIdx].isStreaming) {
+                updated[lastIdx] = {
+                  role: 'assistant',
+                  content: fullText,
+                  actions: [],
+                  isStreaming: false,
+                };
+              }
+              return updated;
+            });
+            setIsLoading(false);
+            setToolActivity(null);
+          },
+          onError: (error) => {
+            console.error('Chat error:', error);
+            setMessages(prev => {
+              const updated = [...prev];
+              const lastIdx = updated.length - 1;
+              if (updated[lastIdx].isStreaming) {
+                updated[lastIdx] = {
+                  role: 'assistant',
+                  content: `I encountered an error: ${error.message}. Please check your API key in Settings.`,
+                  actions: [
+                    { action_type: 'open_settings', label: 'Open Settings', data: '' },
+                  ],
+                  isStreaming: false,
+                };
+              }
+              return updated;
+            });
+            setIsLoading(false);
+            setToolActivity(null);
+          },
+          onToolCall: (toolName) => {
+            setToolActivity(`Querying ${formatToolName(toolName)}...`);
+          },
+          onToolResult: () => {
+            setToolActivity(null);
+          },
+        }
+      );
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      setMessages(prev => {
+        const updated = [...prev];
+        const lastIdx = updated.length - 1;
+        if (updated[lastIdx].isStreaming) {
+          updated[lastIdx] = {
+            role: 'assistant',
+            content: `I encountered an error: ${error}. Please check your API key in Settings.`,
+            actions: [
+              { action_type: 'open_settings', label: 'Open Settings', data: '' },
+            ],
+            isStreaming: false,
+          };
+        }
+        return updated;
+      });
+      setIsLoading(false);
     }
+  };
+
+  const formatToolName = (name: string): string => {
+    const names: Record<string, string> = {
+      getRecentGames: 'your recent games',
+      getPlayerStats: 'your statistics',
+      getWeaknessHistory: 'your weakness history',
+      searchGamesByOpening: 'games by opening',
+      getGamesWithMistakes: 'games with mistakes',
+      getTrainingProgress: 'training progress',
+      getImprovementTrend: 'improvement trend',
+    };
+    return names[name] || name;
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -126,17 +244,20 @@ export const GurgrehChat: React.FC<GurgrehChatProps> = ({
         title="Gurgeh - Chess Coach"
         icon="[G]"
         onClose={onClose}
-        width={360}
-        height={480}
+        width={400}
+        height={520}
       >
         <div className="gurgeh-messages">
           {messages.map((msg, i) => (
-            <div key={i} className={`gurgeh-message ${msg.role}`}>
+            <div key={i} className={`gurgeh-message ${msg.role === 'assistant' ? 'gurgeh' : 'user'}`}>
               <div className="gurgeh-message-avatar">
-                {msg.role === 'gurgeh' ? '[G]' : '[U]'}
+                {msg.role === 'assistant' ? '[G]' : '[U]'}
               </div>
               <div className="gurgeh-message-content">
-                <div className="gurgeh-message-text">{msg.content}</div>
+                <div className="gurgeh-message-text">
+                  {msg.content}
+                  {msg.isStreaming && <span className="cursor">|</span>}
+                </div>
                 {msg.actions.length > 0 && (
                   <div className="gurgeh-message-actions">
                     {msg.actions.map((action, j) => (
@@ -152,7 +273,7 @@ export const GurgrehChat: React.FC<GurgrehChatProps> = ({
               </div>
             </div>
           ))}
-          {isTyping && (
+          {isLoading && !messages.some(m => m.isStreaming) && (
             <div className="gurgeh-message gurgeh">
               <div className="gurgeh-message-avatar">[G]</div>
               <div className="gurgeh-typing">
@@ -165,6 +286,13 @@ export const GurgrehChat: React.FC<GurgrehChatProps> = ({
           <div ref={messagesEndRef} />
         </div>
 
+        {toolActivity && (
+          <div className="gurgeh-status">
+            <div className="gurgeh-status-dot"></div>
+            {toolActivity}
+          </div>
+        )}
+
         <div className="gurgeh-input-area">
           <input
             type="text"
@@ -173,8 +301,9 @@ export const GurgrehChat: React.FC<GurgrehChatProps> = ({
             onKeyDown={handleKeyPress}
             placeholder="Ask Gurgeh anything..."
             className="xp-input gurgeh-input"
+            disabled={isLoading}
           />
-          <XPButton onClick={sendMessage} disabled={!input.trim() || isTyping}>
+          <XPButton onClick={sendMessage} disabled={!input.trim() || isLoading || !apiKey}>
             Send
           </XPButton>
         </div>

@@ -1,119 +1,115 @@
 use serde::{Deserialize, Serialize};
-use std::sync::Mutex;
-use std::path::PathBuf;
-use std::fs;
-
-lazy_static::lazy_static! {
-    static ref USER_PROFILE: Mutex<Option<UserProfile>> = Mutex::new(None);
-    static ref API_KEY: Mutex<Option<String>> = Mutex::new(None);
-}
+use crate::DB;
+use crate::database::repositories::{self, Profile};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserProfile {
-    pub id: u32,
+    pub id: i64,
     pub name: String,
     pub initial_level: String,
     pub current_elo: i32,
     pub peak_elo: i32,
-    pub games_played: u32,
-    pub exercises_completed: u32,
-    pub streak: u32,
+    pub games_played: i32,
+    pub exercises_completed: i32,
+    pub streak: i32,
     pub style: String,
     pub weaknesses: Vec<String>,
     pub strengths: Vec<String>,
     pub created_at: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct SkillMetric {
-    pub name: String,
-    pub value: f32,
-    pub trend: String,
+impl From<Profile> for UserProfile {
+    fn from(p: Profile) -> Self {
+        UserProfile {
+            id: p.id,
+            name: p.name,
+            initial_level: p.initial_level,
+            current_elo: p.current_elo,
+            peak_elo: p.peak_elo,
+            games_played: p.games_played,
+            exercises_completed: p.exercises_completed,
+            streak: p.streak,
+            style: p.style,
+            weaknesses: p.weaknesses,
+            strengths: p.strengths,
+            created_at: p.created_at,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserStats {
     pub current_elo: i32,
     pub peak_elo: i32,
-    pub games_played: u32,
-    pub exercises_completed: u32,
-    pub streak: u32,
+    pub games_played: i32,
+    pub exercises_completed: i32,
+    pub streak: i32,
     pub style: String,
-    pub exercises_until_calibration: u32,
+    pub exercises_until_calibration: i32,
 }
 
-fn get_config_dir() -> Option<PathBuf> {
-    dirs::config_dir().map(|p| p.join("Tacticus"))
-}
-
-fn ensure_config_dir() -> Result<PathBuf, String> {
-    let config_dir = get_config_dir()
-        .ok_or_else(|| "Could not determine config directory".to_string())?;
-    
-    if !config_dir.exists() {
-        fs::create_dir_all(&config_dir)
-            .map_err(|e| format!("Failed to create config directory: {}", e))?;
-    }
-    
-    Ok(config_dir)
-}
-
-fn get_api_key_path() -> Option<PathBuf> {
-    get_config_dir().map(|p| p.join("api_key"))
-}
-
-fn get_profile_path() -> Option<PathBuf> {
-    get_config_dir().map(|p| p.join("profile.json"))
-}
-
-// Initialize API key from file on startup
+// Initialize API key from database or file on startup
 pub fn init_api_key() {
-    if let Some(path) = get_api_key_path() {
+    // First check database
+    if let Ok(Some(key)) = DB.with_conn(|conn| repositories::get_setting(conn, "api_key")) {
+        if !key.is_empty() {
+            std::env::set_var("OPENROUTER_API_KEY", &key);
+            return;
+        }
+    }
+
+    // Fall back to file-based storage for migration
+    if let Some(path) = dirs::config_dir().map(|p| p.join("Tacticus").join("api_key")) {
         if path.exists() {
-            if let Ok(key) = fs::read_to_string(&path) {
+            if let Ok(key) = std::fs::read_to_string(&path) {
                 let key = key.trim().to_string();
                 if !key.is_empty() {
-                    // Also set as environment variable for the LLM agent
                     std::env::set_var("OPENROUTER_API_KEY", &key);
-                    *API_KEY.lock().unwrap() = Some(key);
+                    // Migrate to database
+                    let _ = DB.with_conn(|conn| repositories::set_setting(conn, "api_key", &key));
                 }
             }
         }
     }
-    
-    // Also check .env file for backwards compatibility
+
+    // Check .env file for backwards compatibility
     dotenv::dotenv().ok();
-    if API_KEY.lock().unwrap().is_none() {
-        if let Ok(key) = std::env::var("OPENROUTER_API_KEY") {
-            *API_KEY.lock().unwrap() = Some(key);
-        }
-    }
 }
 
-// Initialize profile from file on startup
+// Initialize profile from database on startup
 pub fn init_profile() {
-    if let Some(path) = get_profile_path() {
+    // Check if there's already a profile in the database
+    if let Ok(Some(_)) = DB.with_conn(|conn| repositories::get_first_profile(conn)) {
+        return; // Profile exists
+    }
+
+    // Try to migrate from file-based storage
+    if let Some(path) = dirs::config_dir().map(|p| p.join("Tacticus").join("profile.json")) {
         if path.exists() {
-            if let Ok(data) = fs::read_to_string(&path) {
-                if let Ok(profile) = serde_json::from_str::<UserProfile>(&data) {
-                    *USER_PROFILE.lock().unwrap() = Some(profile);
+            if let Ok(data) = std::fs::read_to_string(&path) {
+                if let Ok(old_profile) = serde_json::from_str::<serde_json::Value>(&data) {
+                    // Migrate old profile to database
+                    let name = old_profile["name"].as_str().unwrap_or("Player");
+                    let initial_level = old_profile["initial_level"].as_str().unwrap_or("beginner");
+                    let current_elo = old_profile["current_elo"].as_i64().unwrap_or(800) as i32;
+
+                    if let Ok(profile) = DB.with_conn(|conn| {
+                        repositories::create_profile(conn, name, initial_level, current_elo)
+                    }) {
+                        // Update with additional fields from old profile
+                        let mut updated = profile;
+                        updated.peak_elo = old_profile["peak_elo"].as_i64().unwrap_or(updated.current_elo as i64) as i32;
+                        updated.games_played = old_profile["games_played"].as_i64().unwrap_or(0) as i32;
+                        updated.exercises_completed = old_profile["exercises_completed"].as_i64().unwrap_or(0) as i32;
+                        updated.streak = old_profile["streak"].as_i64().unwrap_or(0) as i32;
+                        updated.style = old_profile["style"].as_str().unwrap_or("Unknown").to_string();
+
+                        let _ = DB.with_conn(|conn| repositories::update_profile(conn, &updated));
+                    }
                 }
             }
         }
     }
-}
-
-fn save_profile_to_file(profile: &UserProfile) -> Result<(), String> {
-    let config_dir = ensure_config_dir()?;
-    let path = config_dir.join("profile.json");
-    
-    let data = serde_json::to_string_pretty(profile)
-        .map_err(|e| format!("Failed to serialize profile: {}", e))?;
-    
-    fs::write(&path, data)
-        .map_err(|e| format!("Failed to save profile: {}", e))?;
-    
-    Ok(())
 }
 
 #[tauri::command]
@@ -125,52 +121,44 @@ pub fn create_user_profile(name: String, initial_level: String) -> Result<UserPr
         other => other.parse().unwrap_or(800),
     };
 
-    let profile = UserProfile {
-        id: 1,
-        name,
-        initial_level,
-        current_elo: elo,
-        peak_elo: elo,
-        games_played: 0,
-        exercises_completed: 0,
-        streak: 0,
-        style: "Unknown".to_string(),
-        weaknesses: vec![],
-        strengths: vec![],
-        created_at: chrono::Utc::now().to_rfc3339(),
-    };
+    let profile = DB
+        .with_conn(|conn| repositories::create_profile(conn, &name, &initial_level, elo))
+        .map_err(|e| format!("Failed to create profile: {}", e))?;
 
-    // Save to file
-    save_profile_to_file(&profile)?;
-    
-    *USER_PROFILE.lock().unwrap() = Some(profile.clone());
-    Ok(profile)
+    Ok(profile.into())
 }
 
 #[tauri::command]
 pub fn get_user_profile() -> Option<UserProfile> {
-    USER_PROFILE.lock().unwrap().clone()
+    DB.with_conn(|conn| repositories::get_first_profile(conn))
+        .ok()
+        .flatten()
+        .map(|p| p.into())
 }
 
 #[tauri::command]
 pub fn get_user_stats() -> Option<UserStats> {
-    let profile = USER_PROFILE.lock().unwrap();
-    profile.as_ref().map(|p| UserStats {
-        current_elo: p.current_elo,
-        peak_elo: p.peak_elo,
-        games_played: p.games_played,
-        exercises_completed: p.exercises_completed,
-        streak: p.streak,
-        style: p.style.clone(),
-        exercises_until_calibration: 10 - (p.exercises_completed % 10),
+    let profile = DB
+        .with_conn(|conn| repositories::get_first_profile(conn))
+        .ok()
+        .flatten()?;
+
+    Some(UserStats {
+        current_elo: profile.current_elo,
+        peak_elo: profile.peak_elo,
+        games_played: profile.games_played,
+        exercises_completed: profile.exercises_completed,
+        streak: profile.streak,
+        style: profile.style,
+        exercises_until_calibration: 10 - (profile.exercises_completed % 10),
     })
 }
 
 #[tauri::command]
 pub fn update_user_elo(new_elo: i32, game_result: String) -> Result<UserProfile, String> {
-    let mut profile_lock = USER_PROFILE.lock().unwrap();
-    let profile = profile_lock
-        .as_mut()
+    let mut profile = DB
+        .with_conn(|conn| repositories::get_first_profile(conn))
+        .map_err(|e| format!("Database error: {}", e))?
         .ok_or_else(|| "No user profile found".to_string())?;
 
     profile.current_elo = new_elo;
@@ -183,13 +171,45 @@ pub fn update_user_elo(new_elo: i32, game_result: String) -> Result<UserProfile,
         profile.streak = 0;
     }
 
-    let result = profile.clone();
-    
-    // Save to file
-    drop(profile_lock);
-    save_profile_to_file(&result)?;
-    
-    Ok(result)
+    DB.with_conn(|conn| repositories::update_profile(conn, &profile))
+        .map_err(|e| format!("Failed to update profile: {}", e))?;
+
+    Ok(profile.into())
+}
+
+#[tauri::command]
+pub fn save_api_key(api_key: String) -> Result<(), String> {
+    // Save to database
+    DB.with_conn(|conn| repositories::set_setting(conn, "api_key", &api_key))
+        .map_err(|e| format!("Failed to save API key: {}", e))?;
+
+    // Also set as environment variable for immediate use
+    std::env::set_var("OPENROUTER_API_KEY", &api_key);
+
+    Ok(())
+}
+
+#[tauri::command]
+pub fn get_api_key() -> Option<String> {
+    // First check environment
+    if let Ok(key) = std::env::var("OPENROUTER_API_KEY") {
+        if !key.is_empty() {
+            return Some(key);
+        }
+    }
+
+    // Then check database
+    DB.with_conn(|conn| repositories::get_setting(conn, "api_key"))
+        .ok()
+        .flatten()
+}
+
+#[tauri::command]
+pub fn has_completed_onboarding() -> bool {
+    DB.with_conn(|conn| repositories::get_first_profile(conn))
+        .ok()
+        .flatten()
+        .is_some()
 }
 
 pub fn calculate_new_elo(user_elo: i32, opponent_elo: i32, result: f32) -> i32 {
@@ -197,29 +217,4 @@ pub fn calculate_new_elo(user_elo: i32, opponent_elo: i32, result: f32) -> i32 {
     let expected = 1.0 / (1.0 + 10.0_f32.powf((opponent_elo - user_elo) as f32 / 400.0));
     let new_elo = user_elo as f32 + k as f32 * (result - expected);
     new_elo.round() as i32
-}
-
-#[tauri::command]
-pub fn save_api_key(api_key: String) -> Result<(), String> {
-    let config_dir = ensure_config_dir()?;
-    let path = config_dir.join("api_key");
-    
-    fs::write(&path, &api_key)
-        .map_err(|e| format!("Failed to save API key: {}", e))?;
-    
-    // Also set as environment variable for immediate use
-    std::env::set_var("OPENROUTER_API_KEY", &api_key);
-    *API_KEY.lock().unwrap() = Some(api_key);
-    
-    Ok(())
-}
-
-#[tauri::command]
-pub fn get_api_key() -> Option<String> {
-    API_KEY.lock().unwrap().clone()
-}
-
-#[tauri::command]
-pub fn has_completed_onboarding() -> bool {
-    USER_PROFILE.lock().unwrap().is_some()
 }

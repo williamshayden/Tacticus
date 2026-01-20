@@ -4,11 +4,11 @@ members = [
     "crates/chess-engine",
     "crates/chess-trainer",
     "crates/chess-ai",
-    "crates/chess-llm-agent",
     "tacticus-ui/src-tauri",
 ]
 exclude = [
     "crates/chess-storage",
+    "crates/chess-llm-agent",
 ]
 default-members = ["tacticus-ui/src-tauri"]
 resolver = "2"
